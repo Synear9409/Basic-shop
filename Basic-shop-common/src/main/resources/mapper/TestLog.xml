@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.synear.ThreadPool.dao.LogDao">
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into t_test_log
+        (logContent)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.logContent}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsert2" parameterType="com.synear.ThreadPool.pojo.LogBean">
+        insert into t_test_log
+        (logContent)
+        values
+        (#{log.logContent})
+    </insert>
+
+</mapper>

@@ -1,0 +1,22 @@
+
+# 启动端口号
+server:
+  port: 9410
+
+
+# 配置数据源信息
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://39.106.215.59:3306/foodie-shop-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    username: root
+    password: imooc
+
+elasticsearch:
+  hostname: 127.0.0.1
+  port: 9200
+  scheme: http
+
+

@@ -1,0 +1,17 @@
+server:
+  port: 8120
+
+spring:
+  datasource:                                           # 数据源的相关配置
+    url: jdbc:mysql://39.106.215.59:3306/foodie-shop-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    username: root
+    password: imooc
+  redis:
+    host: 192.168.137.100
+    database: 0
+    port: 6379
+    password: 123456
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
