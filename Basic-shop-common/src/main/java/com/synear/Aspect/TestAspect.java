@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestAspect {
 
-    @Pointcut("execution(* com.synear.Aspect..*.*(..))")
+//    @Pointcut("execution(* com.synear.Aspect..*.*(..))")
+    @Pointcut(value = "@annotation(com.synear.annotation.TestAnnotation)")
     private void testAspect(){};
 
     @Around("testAspect()")
