@@ -6,18 +6,17 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,8 +64,16 @@ public class ItemsESServiceImpl implements ItemsESService {
 
             // 聚合查询
             /*AggregationBuilder aggregationBuilder = AggregationBuilders.max("maxAge").field("age");  // 找出年龄最大值
-            AggregationBuilder aggregationBuilder2 = AggregationBuilders.terms("ageGroup").field("age");  // 将年龄分组查询，并告诉你每种年龄多少个
             sourceBuilder.aggregation(aggregationBuilder);*/
+
+            // 聚合查询  -- 具体看json格式的请求(resource/聚合查询.json)
+            TermsAggregationBuilder aggregationBuilder1 =  AggregationBuilders.terms("father").field("userId").size(1);
+            SumAggregationBuilder resumeViewBuilder = AggregationBuilders.sum("child").field("resumeView");
+            SumAggregationBuilder loginCountBuilder = AggregationBuilders.sum("loginCount").field("loginCount");
+            aggregationBuilder1.subAggregation(resumeViewBuilder);
+            aggregationBuilder1.subAggregation(loginCountBuilder);
+            aggregationBuilder1.order(BucketOrder.aggregation("child", false));
+            sourceBuilder.aggregation(aggregationBuilder1);
 
             // 排序搜索
             if (sort.equals("c")) {

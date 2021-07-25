@@ -1,0 +1,47 @@
+//GET ehirestate/_search?size=0
+{
+  "query": {
+    "bool" : {
+      "filter" : [
+        {
+          "term" : {
+            "ctmId" : {
+            "value" : 1475127
+            }
+          }
+        },
+        {
+          "range": {
+            "date": {
+            "gte": 20191201,
+            "lte": 20191231
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "father": {
+      "terms": {
+        "field": "userId",       
+        "size": 1,
+        "order": {
+        "child": "desc"
+        }
+      },
+      "aggs": {
+        "child": {
+          "sum": {
+          "field": "resumeView"
+          }
+        },
+        "loginCount":{
+          "sum": {
+          "field": "loginCount"
+          }
+        }
+      }
+    }
+  }
+}
