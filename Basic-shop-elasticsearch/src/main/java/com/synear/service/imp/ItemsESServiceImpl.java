@@ -6,12 +6,12 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
@@ -45,6 +45,28 @@ public class ItemsESServiceImpl implements ItemsESService {
             sourceBuilder.from((page-1) * pageSize);
             sourceBuilder.size(pageSize);
 
+            // 组合查询
+            /*BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.must(QueryBuilders.matchQuery("name",keywords));
+            boolQueryBuilder.must(QueryBuilders.matchQuery("sex",keywords));
+            boolQueryBuilder.should(QueryBuilders.matchQuery("name",keywords));
+            boolQueryBuilder.should(QueryBuilders.matchQuery("sex",keywords));
+            sourceBuilder.query(boolQueryBuilder);*/
+
+            // 范围查询
+            /*RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("age");
+            rangeQuery.gte(30);   //大于等于
+            rangeQuery.lt(50);    //小于
+            sourceBuilder.query(rangeQuery);*/
+
+            // 模糊查询
+            /*FuzzyQueryBuilder fuzzyQueryBuilder = QueryBuilders.fuzzyQuery("name", keywords).fuzziness(Fuzziness.ONE);// 模糊查询  允许查询内容偏差长度为一
+            sourceBuilder.query(fuzzyQueryBuilder);*/
+
+            // 聚合查询
+            /*AggregationBuilder aggregationBuilder = AggregationBuilders.max("maxAge").field("age");  // 找出年龄最大值
+            AggregationBuilder aggregationBuilder2 = AggregationBuilders.terms("ageGroup").field("age");  // 将年龄分组查询，并告诉你每种年龄多少个
+            sourceBuilder.aggregation(aggregationBuilder);*/
 
             // 排序搜索
             if (sort.equals("c")) {

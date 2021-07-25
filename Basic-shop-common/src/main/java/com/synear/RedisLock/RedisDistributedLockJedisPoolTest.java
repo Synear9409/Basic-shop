@@ -1,31 +1,26 @@
-package com.synear.redis;
+package com.synear.RedisLock;
 
-import com.synear.RedisLock.RedisDistributedLock;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
-@SpringBootTest
-class redisTest {
+public class RedisDistributedLockJedisPoolTest {
 
-    @Autowired
-    private JedisPool jedisPool;
+    private static JedisPool jedisPool = new JedisPool(new JedisPoolConfig(),"192.168.137.100", 6379, 30000, "123456");
 
     private static int n = 500;
     static void decSum() {
         System.out.println(--n);
     }
 
-    @Test
-    void test() {
+    public static void main(String[] args) {
         Runnable runnable = () -> {
             RedisDistributedLock distributedLock = null;
             String token = null;  // 客户端标识  加锁成功则可返回此token
+            Jedis jedis = jedisPool.getResource(); // 从池中拿到jedis对象
             try {
-                distributedLock = new RedisDistributedLock(jedisPool, "Test");
+                distributedLock = new RedisDistributedLock(jedis, "Test");
 
                 /**
                  * while循环分析
@@ -42,6 +37,8 @@ class redisTest {
                 if (distributedLock != null) {
                     distributedLock.releaseLock(token);
                 }
+                /*if (jedisPool != null)
+                    jedisPool.close();*/
             }
         };
 
@@ -50,4 +47,5 @@ class redisTest {
             t.start();
         }
     }
+
 }

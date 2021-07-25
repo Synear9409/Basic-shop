@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-public class RedisDistributedLockTest {
+public class RedisDistributedLockJedisTest {
 
     public static int n = 500;
     public static void decSum() {

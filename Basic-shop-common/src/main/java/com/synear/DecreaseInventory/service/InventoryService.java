@@ -89,7 +89,7 @@ public class InventoryService {
         long stock = inventory(key, num);
         // 初始化库存
         if (stock == UNINITIALIZED_STOCK) {
-            RedisDistributedLock redisLock = new RedisDistributedLock(jedisPool, key);
+            RedisDistributedLock redisLock = new RedisDistributedLock(jedisPool.getResource(), key);
             String identify = null;
             try {
                 // 获取锁
@@ -144,7 +144,7 @@ public class InventoryService {
         }
 
         Assert.notNull(expire, "初始化库存失败，库存过期时间不能为null");
-        RedisDistributedLock redisLock = new RedisDistributedLock(jedisPool, key);
+        RedisDistributedLock redisLock = new RedisDistributedLock(jedisPool.getResource(), key);
         String identify = null;
         try {
             // 获取锁
@@ -241,7 +241,7 @@ public class InventoryService {
         }
 
         Assert.notNull(expire,"初始化库存失败，库存过期时间不能为null");
-        RedisDistributedLock redisLock = new RedisDistributedLock(jedisPool, key);
+        RedisDistributedLock redisLock = new RedisDistributedLock(jedisPool.getResource(), key);
         String identify = null;
         try {
             identify = redisLock.acquire();

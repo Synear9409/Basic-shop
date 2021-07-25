@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.params.SetParams;
 
 import java.util.Collections;
@@ -23,11 +22,6 @@ public class RedisDistributedLock {
 
     // 释放锁成功标志
     private static final Long RELEASE_SUCCESS = 1L;
-
-    /**
-     * redis连接池
-     */
-    private JedisPool jedisPool;
 
     /**
      * redis
@@ -51,16 +45,6 @@ public class RedisDistributedLock {
 
     /**
      * 获取指定键值的锁
-     * @param jedisPool jedis连接池
-     * @param lockKey 锁的键值
-     */
-    public RedisDistributedLock(JedisPool jedisPool, String lockKey) {
-        this.jedisPool = jedisPool;
-        this.lockKey = lockKey;
-    }
-
-    /**
-     * 获取指定键值的锁
      * @param jedis redis客户端
      * @param lockKey 锁的键值
      */
@@ -71,25 +55,25 @@ public class RedisDistributedLock {
 
     /**
      * 获取指定键值的锁,同时设置获取锁超时时间
-     * @param jedisPool jedis连接池
+     * @param jedis redis客户端
      * @param lockKey 锁的键值
      * @param acquireTimeout 获取锁超时时间
      */
-    public RedisDistributedLock(JedisPool jedisPool, String lockKey, int acquireTimeout) {
-        this.jedisPool = jedisPool;
+    public RedisDistributedLock(Jedis jedis, String lockKey, int acquireTimeout) {
+        this.jedis = jedis;
         this.lockKey = lockKey;
         this.acquireTimeout = acquireTimeout;
     }
 
     /**
      * 获取指定键值的锁,同时设置获取锁超时时间和锁过期时间
-     * @param jedisPool jedis连接池
+     * @param jedis redis客户端
      * @param lockKey 锁的键值
      * @param acquireTimeout 获取锁超时时间
      * @param expireTime 锁失效时间
      */
-    public RedisDistributedLock(JedisPool jedisPool, String lockKey, int acquireTimeout, int expireTime) {
-        this.jedisPool = jedisPool;
+    public RedisDistributedLock(Jedis jedis, String lockKey, int acquireTimeout, int expireTime) {
+        this.jedis = jedis;
         this.lockKey = lockKey;
         this.acquireTimeout = acquireTimeout;
         this.expireTime = expireTime;
@@ -111,8 +95,7 @@ public class RedisDistributedLock {
                 SetParams params = new SetParams();
                 params.nx();  // Only set the key if it does not already exist
                 params.px(expireTime);  // 设置键key的过期时间，单位时毫秒
-                String result = jedisPool.getResource().set(lockKey, token, params);
-//                String result = jedis.set(lockKey, token, params);
+                String result = jedis.set(lockKey, token, params);
                 // 对应redis命令： SET lockKey token NX PX expireTime
                 if (LOCK_SUCCESS.equals(result)) {  // 获取锁成功，返回客户端标识
                     System.out.println(Thread.currentThread().getName()+"拿到了锁！");
@@ -143,8 +126,7 @@ public class RedisDistributedLock {
         Object result = new Object();
         String lru_script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
         try {
-            result = jedisPool.getResource().eval(lru_script, Collections.singletonList(lockKey), Collections.singletonList(identify));
-//            result = jedis.eval(lru_script, Collections.singletonList(lockKey), Collections.singletonList(identify));
+            result = jedis.eval(lru_script, Collections.singletonList(lockKey), Collections.singletonList(identify));
             if (RELEASE_SUCCESS.equals(result)) {   // 释放锁成功
                 System.out.println(Thread.currentThread().getName()+"释放了锁！");
                 logger.info("release lock success, token:{}", identify);
@@ -153,9 +135,8 @@ public class RedisDistributedLock {
         }catch (Exception e) {
             logger.error("release lock due to error",e);
         }finally {
-            if (jedisPool != null) {
-                jedisPool.close();
-//                jedis.close();
+            if (jedis != null) {
+                jedis.close();
             }
         }
 
